@@ -1,0 +1,36 @@
+# Read the ELF header
+readelf -h main
+
+# Reads the Section headers
+# "Address": Virtual address where the section will be place in main memory
+# "Off":     File offset from where the section will be loaded from the File
+# "Size":    How many bytes are read from the "Off" into main memory
+readelf -S main --wide
+
+# Reads the Segment headers
+readelf -l main --wide
+
+# Shows the Symbol table of the compiled module
+# Because the module is only compiled, but not *linked*, the virtual addresses are all
+# relative to the current section and therefore zero-based!
+objdump -tf -m intel main.o
+
+# Shows the Relocation table
+readelf --relocs main.o
+
+ 
+objdump -M intel --disassemble main
+objdump -M intel --disassemble-all main
+
+gdb main
+    set disassembly-flavor intel    ; Sets the Intel assembly syntax
+    b main.c:9                      ; Set a breakpoint to line 5
+    b main.c:10                     ; Set a breakpoint to line 6
+    disas main                      ; Disassemble "main"
+    disas 'puts@plt'                ; Disassemble "puts@plt"
+    p/x *(void**)0x404018           ; Points to 0x401030
+    r                               ; Run the program up to the first breakpoint (the 1st printf statement)
+    p/x *(void**)0x404018           ; Points to 0x401030
+    c                               ; Continue code execution up to the next breakpoint (the 2nd printf statement)
+    p/x *(void**)0x404018           ; Points to 0x7ffff...
+    disas 0x7ffff...                ; Shows the __GI__IO_puts assembly code, so the shared library was loaded through the Dynamic Linker into memory
